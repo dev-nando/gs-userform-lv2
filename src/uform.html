@@ -14,7 +14,17 @@
   
   <body>
 
-    <h1>Hello, world!</h1>
+    <div>
+      <div class="mb-3">
+        <label for="item-name" class="form-label">Item Name</label>
+        <input type="text" class="form-control" id="item-name">
+      </div>
+      <div class="mb-3">
+        <label for="qty-received" class="form-label">Qty Received</label>
+        <input type="text" class="form-control" id="qty-received">
+      </div>
+      <button class="btn btn-primary" id="mainButton">Add</button>
+    </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
 
@@ -26,5 +36,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
     -->
+    <script>
+      
+      function afterButtonClicked(){
+        var item = document.getElementById("item-name");
+        var qty = document.getElementById("qty-received");
+        var rowData = {item: item.value, qty: qty.value};
+        google.script.run.addNewRow(rowData);
+      }
+
+      document.getElementById("mainButton").addEventListener("click", afterButtonClicked);
+      
+    </script>
   </body>
 </html>
