@@ -16,9 +16,15 @@
     <div class="container">
       <div>
         <div class="mb-3">
+          <label for="item-category" class="form-label">Item Category</label>
+          <select class="form-control" id="item-category">
+          </select>
+        </div>
+        <div class="mb-3">
           <label for="item-name" class="form-label">Item Name</label>
           <select class="form-control" id="item-name">
           </select>
+        </div>
         <div class="mb-3">
           <label for="qty-received" class="form-label">Qty Received</label>
           <input type="text" class="form-control" id="qty-received">
@@ -40,10 +46,13 @@
     -->
     <script>
       
+      var arrayOfValues;
+
       function afterButtonClicked(){
+        var category = document.getElementById("item-category");
         var item = document.getElementById("item-name");
         var qty = document.getElementById("qty-received");
-        var rowData = {item: item.value, qty: qty.value};
+        var rowData = {category: category.value, item: item.value, qty: qty.value};
         google.script.run.withSuccessHandler(afterSubmit).addNewRow(rowData);
       }
 
@@ -56,19 +65,35 @@
         google.script.run.withSuccessHandler(afterDropDownArrayReturns).getDropDownArray();
       }
 
-      function afterDropDownArrayReturns(arrayOfArrays){
-
-        var item = document.getElementById("item-name");
-        
+      function addUniqueOptionsToDropdownList(el, arrayOfArrays, index){
+        var currentlyAdded = [];
+        el.innerHTML = '';
         arrayOfArrays.forEach(function(r){
-          var option = document.createElement("option");
-          option.textContent = r[0];
-          item.appendChild(option);
+          if (currentlyAdded.indexOf(r[index]) === -1){
+            var option = document.createElement("option");
+            option.textContent = r[index];
+            el.appendChild(option);
+            currentlyAdded.push(r[index])
+          }
         });
+      }
 
+      function afterDropDownArrayReturns(arrayOfArrays){
+        arrayOfValues = arrayOfArrays.filter(function(r){ return true; });
+        var item = document.getElementById("item-category");
+        addUniqueOptionsToDropdownList(item, arrayOfArrays, 0);
+        afterFirstDropDownChanged();
+      }
+
+      function afterFirstDropDownChanged(){
+        var item = document.getElementById("item-name");
+        var category = document.getElementById("item-category").value;
+        var filteredArrayOfValues = arrayOfValues.filter(function(r){ return r[0] === category });
+        addUniqueOptionsToDropdownList(item, filteredArrayOfValues, 1);
       }
 
       document.getElementById("mainButton").addEventListener("click", afterButtonClicked);
+      document.getElementById("item-category").addEventListener("change", afterFirstDropDownChanged);
       document.addEventListener("DOMContentLoaded", afterSidebarLoadas);
       
     </script>
