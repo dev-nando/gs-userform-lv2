@@ -13,17 +13,19 @@
   </head>
   
   <body>
-
-    <div>
-      <div class="mb-3">
-        <label for="item-name" class="form-label">Item Name</label>
-        <input type="text" class="form-control" id="item-name">
+    <div class="container">
+      <div>
+        <div class="mb-3">
+          <label for="item-name" class="form-label">Item Name</label>
+          <select class="form-control" id="item-name">
+          </select>
+        <div class="mb-3">
+          <label for="qty-received" class="form-label">Qty Received</label>
+          <input type="text" class="form-control" id="qty-received">
+        </div>
+        
+        <button class="btn btn-primary" id="mainButton">Add</button>
       </div>
-      <div class="mb-3">
-        <label for="qty-received" class="form-label">Qty Received</label>
-        <input type="text" class="form-control" id="qty-received">
-      </div>
-      <button class="btn btn-primary" id="mainButton">Add</button>
     </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
@@ -42,10 +44,32 @@
         var item = document.getElementById("item-name");
         var qty = document.getElementById("qty-received");
         var rowData = {item: item.value, qty: qty.value};
-        google.script.run.addNewRow(rowData);
+        google.script.run.withSuccessHandler(afterSubmit).addNewRow(rowData);
+      }
+
+      function afterSubmit(e){
+        var qty = document.getElementById("qty-received");
+        qty.value = "";
+      }
+
+      function afterSidebarLoadas(){
+        google.script.run.withSuccessHandler(afterDropDownArrayReturns).getDropDownArray();
+      }
+
+      function afterDropDownArrayReturns(arrayOfArrays){
+
+        var item = document.getElementById("item-name");
+        
+        arrayOfArrays.forEach(function(r){
+          var option = document.createElement("option");
+          option.textContent = r[0];
+          item.appendChild(option);
+        });
+
       }
 
       document.getElementById("mainButton").addEventListener("click", afterButtonClicked);
+      document.addEventListener("DOMContentLoaded", afterSidebarLoadas);
       
     </script>
   </body>
