@@ -14,7 +14,8 @@
   
   <body>
     <div class="container">
-      <div>
+      <h4>Receive Inventory</h4>
+      <div id="userform">
         <div class="mb-3">
           <label for="item-category" class="form-label">Item Category</label>
           <select class="form-control" id="item-category">
@@ -27,11 +28,39 @@
         </div>
         <div class="mb-3">
           <label for="qty-received" class="form-label">Qty Received</label>
-          <input type="text" class="form-control" id="qty-received">
+          <input type="number" class="form-control" id="qty-received" required>
+        </div>
+        <div class="mb-3">
+          <label for="date-received" class="form-label">Date Received</label>
+          <input type="date" class="form-control" id="date-received" required>
         </div>
         
         <button class="btn btn-primary" id="mainButton">Add</button>
       </div>
+
+      <div id="notifications" class="mt-4">
+        <div id="errorNotification" style="background-color:salmon" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto">Error</strong>
+            <small>Notification</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            One or more required fields were not completed.
+          </div>
+        </div>
+        <div id="successNotification" style="background-color:greenyellow" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto">Success</strong>
+            <small>Notification</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            Row Added!!
+          </div>
+        </div>
+      </div>  
+
     </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
@@ -49,16 +78,37 @@
       var arrayOfValues;
 
       function afterButtonClicked(){
-        var category = document.getElementById("item-category");
-        var item = document.getElementById("item-name");
-        var qty = document.getElementById("qty-received");
-        var rowData = {category: category.value, item: item.value, qty: qty.value};
-        google.script.run.withSuccessHandler(afterSubmit).addNewRow(rowData);
+
+        if (validate()){
+          var category = document.getElementById("item-category");
+          var item = document.getElementById("item-name");
+          var qty = document.getElementById("qty-received");
+          var dateReceived = document.getElementById("date-received");
+          var rowData = {category: category.value, item: item.value, qty: qty.value, dateReceived:dateReceived.value + "T00:00:00"};
+          google.script.run.withSuccessHandler(afterSubmit).addNewRow(rowData);
+        } else {
+          //$('#errorNotification').toast('show');
+          // This is from bootstrap 4, in 5 I found this solution:
+          new bootstrap.Toast(document.getElementById("errorNotification")).show();
+        }
+        
       }
 
       function afterSubmit(e){
         var qty = document.getElementById("qty-received");
         qty.value = "";
+        var dateReceived = document.getElementById("date-received");
+        dateReceived.value = "";
+        var t = new bootstrap.Toast(document.getElementById("successNotification"));
+        t.show()
+      }
+
+      function validate(){
+        var fieldsToValidate = document.querySelectorAll("#userform input");
+        console.log(fieldsToValidate);
+        return Array.prototype.every.call(fieldsToValidate, function(el){
+          return el.checkValidity();
+        })
       }
 
       function afterSidebarLoadas(){
