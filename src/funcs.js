@@ -7,6 +7,7 @@ function addNewRow(rowData) {
   ws.appendRow([
     rowData.category, 
     rowData.item, 
+    rowData.itemType,
     rowData.qty, 
     currentDate, 
     new Date(rowData.dateReceived),
@@ -22,6 +23,6 @@ function getDropDownArray(){
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ws = ss.getSheetByName("Dropdown Options");
-  return ws.getRange(2, 1, ws.getLastRow()-1, 2).getValues();
+  return ws.getRange(2, 1, ws.getLastRow()-1, 3).getValues();
 
 }
