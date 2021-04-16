@@ -4,7 +4,15 @@ function addNewRow(rowData) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ws = ss.getSheetByName("Results");
 
-  ws.appendRow([rowData.category, rowData.item, rowData.qty, currentDate, new Date(rowData.dateReceived)]);
+  ws.appendRow([
+    rowData.category, 
+    rowData.item, 
+    rowData.qty, 
+    currentDate, 
+    new Date(rowData.dateReceived),
+    rowData.deliveryNote,
+    rowData.comments
+  ]);
 
   return true;
   
