@@ -7,7 +7,11 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-
+    <!--
+      <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" rel="stylesheet" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
+    -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" rel="stylesheet">
     <title>Hello, world!</title>
 
     <style>
@@ -99,7 +103,7 @@
         <!--- Delivery Note --->
         <div class="mb-3">
           <label for="delivery-note" class="form-label">Delivery Note</label>
-          <input type="text" class="form-control" id="delivery-note" required pattern="^\d{3}-\d{3}-\d{4}$">
+          <input type="text" class="form-control" id="delivery-note">
           <div class="invalid-feedback">
             Please enter a note.
           </div>
@@ -107,7 +111,7 @@
         <!--- Comment --->
         <div class="mb-3">
           <label for="comments" class="form-label">Notes</label>
-          <textarea class="form-control" id="comments" rows="3" required></textarea>
+          <textarea class="form-control" id="comments" rows="3"></textarea>
           <div class="invalid-feedback">
             Please enter a note.
           </div>
@@ -119,6 +123,14 @@
             <label class="form-check-label checkmark" for="arrivalTime">Arrived Late</label>
           </div>
         </div>
+        <div class="mb-3">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="hasIssues">
+            <label class="form-check-label checkmark" for="hasIssues">Has Issues</label>
+          </div>
+        </div>
+        <!-- Issues -->
+        <div id="issues" class="mb-2"></div>
         
         <button class="btn btn-dark" id="mainButton">Add to Database</button>
       </div>
@@ -156,11 +168,22 @@
       </div>
     </div>
 
+    <template id="inputTemplate">
+      <div class="input-group mb-2 input-line">
+        <input type="text" class="form-control issue-input" placeholder="issue..." required>
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary add-input" type="button"><i class="fas fa-plus"></i></button>
+          <button class="btn btn-outline-secondary remove-input" type="button"><i class="fas fa-minus"></i></button>
+        </div>
+      </div>
+    </template>
+
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-
+    
     <!-- Option 2: Separate Popper and Bootstrap JS -->
     <!--
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
@@ -184,6 +207,10 @@
 
           var arrivalTimeValue = arrivalTime.checked ? "Late" : "On Time";
 
+          var issueInputs = document.getElementsByClassName("issue-input")
+
+          var issueInputsValues = issueInputs.length === 0 ? "-" : Array.prototype.map.call(issueInputs, function(n){ return n. value}).join(", ");
+
           var rowData = {
             category: category.value, 
             item: item.value, 
@@ -192,7 +219,8 @@
             dateReceived: dateReceived.value + "T00:00:00",
             deliveryNote: deliveryNote.value,
             comments: comments.value,
-            arrival: arrivalTimeValue
+            arrival: arrivalTimeValue,
+            issueInputs: issueInputsValues
           };
 
           google.script.run.withSuccessHandler(afterSubmit).addNewRow(rowData);
@@ -205,7 +233,7 @@
       }
 
       function afterSubmit(e){
-        clearFields(["qty-received", "date-received", "delivery-note", "comments", "arrivalTime"])
+        clearFields(["qty-received", "date-received", "delivery-note", "comments", "arrivalTime", "hasIssues"])
         var t = new bootstrap.Toast(document.getElementById("successNotification"));
         t.show();
         updateQtyOnHand();
@@ -216,6 +244,9 @@
           var el = document.getElementById(field);
           if (el.type === "checkbox"){
             el.checked = false;
+            if (field === "hasIssues"){
+              removeAllImputs()
+            }
           } else {
             el.value = "";
           }
@@ -302,10 +333,40 @@
         document.getElementById("on-hand-spinner").classList.add("d-none");
       }
 
+      function addInput(){
+        var issues = document.getElementById("issues");
+        var template = document.getElementById("inputTemplate");
+        var copy = template.content.cloneNode(true);
+        issues.appendChild(copy);
+      }
+
+      function removeAllImputs(){
+        document.getElementById("issues").innerHTML = "";
+      }
+
+      function afterInputButtonCicked(e){
+        if (e.target.matches(".add-input *,.add-input")){
+          addInput()
+        } else if (e.target.matches(".remove-input *,.remove-input")) {
+          if (document.getElementsByClassName("input-line").length > 1){
+            e.target.closest(".input-line").remove();
+          }
+        }
+      }
+
       document.getElementById("mainButton").addEventListener("click", afterButtonClicked);
       document.getElementById("item-category").addEventListener("change", afterFirstDropDownChanged);
       document.getElementById("item-name").addEventListener("change", afterSecondDropDownChanged);
       document.getElementById("item-type").addEventListener("change", updateQtyOnHand);
+      document.getElementById("issues").addEventListener("click", afterInputButtonCicked);
+      document.getElementById("hasIssues").addEventListener("change", e => {
+        if (e.target.checked) {
+          addInput();
+        } else {
+          removeAllImputs();
+        }
+      }
+      );
       document.addEventListener("DOMContentLoaded", afterSidebarLoadas);
       
     </script>
