@@ -12,7 +12,8 @@ function addNewRow(rowData) {
     currentDate, 
     new Date(rowData.dateReceived),
     rowData.deliveryNote,
-    rowData.comments
+    rowData.comments,
+    rowData.arrival
   ]);
 
   return true;

@@ -11,6 +11,7 @@
     <title>Hello, world!</title>
 
     <style>
+
       .loading {
         background-color: black;
         width: 100vw;
@@ -23,6 +24,26 @@
 
       .pt-40 {
         padding-top: 10rem;
+      }
+
+      .checkmark {
+        color: lightgray;
+      }
+
+      .form-check-input:checked {
+        background-color: #fd3030;
+        border-color: grey;
+      }
+
+      .form-check-input:focus{
+        box-shadow: 0px 0px 5px 0px #fd3030c0;
+        border-color: #fd3030;
+
+      }
+
+      input:checked + .checkmark{
+        color: #fd3030;
+        font-weight: bold;
       }
     </style>
 
@@ -91,6 +112,13 @@
             Please enter a note.
           </div>
         </div>
+        <!--- Check boxes --->
+        <div class="mb-3">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="arrivalTime">
+            <label class="form-check-label checkmark" for="arrivalTime">Arrived Late</label>
+          </div>
+        </div>
         
         <button class="btn btn-dark" id="mainButton">Add to Database</button>
       </div>
@@ -152,6 +180,9 @@
           var dateReceived = document.getElementById("date-received");
           var deliveryNote = document.getElementById("delivery-note");
           var comments = document.getElementById("comments");
+          var arrivalTime = document.getElementById("arrivalTime");
+
+          var arrivalTimeValue = arrivalTime.checked ? "Late" : "On Time";
 
           var rowData = {
             category: category.value, 
@@ -160,7 +191,8 @@
             qty: qty.value, 
             dateReceived: dateReceived.value + "T00:00:00",
             deliveryNote: deliveryNote.value,
-            comments: comments.value
+            comments: comments.value,
+            arrival: arrivalTimeValue
           };
 
           google.script.run.withSuccessHandler(afterSubmit).addNewRow(rowData);
@@ -173,7 +205,7 @@
       }
 
       function afterSubmit(e){
-        clearFields(["qty-received", "date-received", "delivery-note", "comments"])
+        clearFields(["qty-received", "date-received", "delivery-note", "comments", "arrivalTime"])
         var t = new bootstrap.Toast(document.getElementById("successNotification"));
         t.show();
         updateQtyOnHand();
@@ -182,7 +214,12 @@
       function clearFields(fields){
         fields.forEach(function(field){
           var el = document.getElementById(field);
-          el.value = ""
+          if (el.type === "checkbox"){
+            el.checked = false;
+          } else {
+            el.value = "";
+          }
+          
         })
       }
 
