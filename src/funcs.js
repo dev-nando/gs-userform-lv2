@@ -1,7 +1,8 @@
 function addNewRow(rowData) {
   
   const currentDate = new Date();
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  // wsID has to be defined as a script property whit the ID of the datasource spreadsheet
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("wsID"));
   const ws = ss.getSheetByName("Results");
 
   ws.appendRow([
@@ -23,7 +24,7 @@ function addNewRow(rowData) {
 
 function getDropDownArray(){
 
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("wsID"));
   const ws = ss.getSheetByName("Dropdown Options");
   return ws.getRange(2, 1, ws.getLastRow()-1, 3).getValues();
 
@@ -31,7 +32,7 @@ function getDropDownArray(){
 
 function getQtyOnHand(category, itemName, itemType){
   
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("wsID"));
   const ws = ss.getSheetByName("Inventory");
   const data = ws.getRange(2, 1, ws.getLastRow()-1, 4).getValues();
 
