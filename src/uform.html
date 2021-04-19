@@ -32,28 +32,42 @@
     <div class="container pt-3">
       <h5 class="border-bottom pb-2 mb-3">Receive Inventory <span class="badge bg-dark">Form</span></h5>
       <div id="userform">
+        <!--- Item Category --->
         <div class="mb-3">
           <label for="item-category" class="form-label">Item Category</label>
           <select class="form-control" id="item-category">
           </select>
         </div>
+        <!--- Item Name --->
         <div class="mb-3">
           <label for="item-name" class="form-label">Item Name</label>
           <select class="form-control" id="item-name">
           </select>
         </div>
+        <!--- Item Type --->
         <div class="mb-3">
           <label for="item-type" class="form-label">Item Type</label>
           <select class="form-control" id="item-type">
           </select>
         </div>
+        <!--- Qty Received --->
         <div class="mb-3">
           <label for="qty-received" class="form-label">Qty Received</label>
-          <input type="number" class="form-control" id="qty-received" required>
-          <div class="invalid-feedback">
-            Please enter a whole number.
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">On Hand <span class="ms-1">
+                  <span class="spinner-grow spinner-grow-sm d-none" id="on-hand-spinner" role="status" aria-hidden="true"></span>
+                  <span id="on-hand">0</span>
+                </span>
+              </span>
+            </div>
+            <input type="number" class="form-control" id="qty-received" required>
+            <div class="invalid-feedback">
+              Please enter a whole number.
+            </div>
           </div>
         </div>
+        <!--- Date Received --->
         <div class="mb-3">
           <label for="date-received" class="form-label">Date Received</label>
           <input type="date" class="form-control" id="date-received" required>
@@ -161,7 +175,8 @@
       function afterSubmit(e){
         clearFields(["qty-received", "date-received", "delivery-note", "comments"])
         var t = new bootstrap.Toast(document.getElementById("successNotification"));
-        t.show()
+        t.show();
+        updateQtyOnHand();
       }
 
       function clearFields(fields){
@@ -227,11 +242,33 @@
         var itemName = document.getElementById("item-name").value;
         var filteredArrayOfValues = arrayOfValues.filter(function(r){ return r[0] === category && r[1] === itemName });
         addUniqueOptionsToDropdownList(itemType, filteredArrayOfValues, 2);
+        updateQtyOnHand();
+      }
+
+      function updateQtyOnHand(){
+        document.getElementById("on-hand").classList.add("d-none");
+        document.getElementById("on-hand-spinner").classList.remove("d-none");
+
+        var category = document.getElementById("item-category").value;
+        var itemName = document.getElementById("item-name").value;
+        var itemType = document.getElementById("item-type").value;
+
+        console.log(google.script.run.withSuccessHandler(afterQtyOnHandReturned).getQtyOnHand(category, itemName, itemType));
+
+        google.script.run.withSuccessHandler(afterQtyOnHandReturned).getQtyOnHand(category, itemName, itemType);
+
+      }
+
+      function afterQtyOnHandReturned(qty){
+        document.getElementById("on-hand").textContent = qty;
+        document.getElementById("on-hand").classList.remove("d-none");
+        document.getElementById("on-hand-spinner").classList.add("d-none");
       }
 
       document.getElementById("mainButton").addEventListener("click", afterButtonClicked);
       document.getElementById("item-category").addEventListener("change", afterFirstDropDownChanged);
       document.getElementById("item-name").addEventListener("change", afterSecondDropDownChanged);
+      document.getElementById("item-type").addEventListener("change", updateQtyOnHand);
       document.addEventListener("DOMContentLoaded", afterSidebarLoadas);
       
     </script>
